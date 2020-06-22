@@ -64,9 +64,11 @@ parameter_dict = {
         },
     'logistic_regression':
         {
-            'clf': [LogisticRegression(random_state=12345,n_jobs=3)],
+            'clf': [LogisticRegression(random_state=12345)],
             'clf__penalty': ['l2'],
-            'clf__C': np.logspace(0, 4, 8)
+            'clf__C': [1,2,4,6,9],
+            'clf__max_iter' : [100, 250, 500, 1000, 2000],
+            'clf__solver' : ["newton-cg", 'sag', "lbfgs"]
         },
     'knn':
         {
