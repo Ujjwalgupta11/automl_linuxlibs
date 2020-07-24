@@ -10,6 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
 import numpy as np
+from xgboost import XGBClassifier
 
 param_spaces = hp.choice('classifier_type', [
     {
@@ -37,15 +38,24 @@ param_spaces = hp.choice('classifier_type', [
 
     {
         'model': 'random_forest',
-        'max_depth': hp.choice('max_depth', range(1, 10)),
-        'max_features': hp.choice('max_features', ["sqrt", 'log2']),
-        'n_estimators': hp.choice('n_estimators', range(1, 100)),
-        'criterion': hp.choice('criterion', ["gini", "entropy"]),
+        'max_depth': hp.choice('max_depth_rf', range(1, 10)),
+        'max_features': hp.choice('max_features_rf', ["sqrt", 'log2']),
+        'n_estimators': hp.choice('n_estimators_rf', range(1, 100)),
+        'criterion': hp.choice('criterion_rf', ["gini", "entropy"]),
 #        'bootstrap': hp.choice('bootstrap', [True]),
         'random_state': hp.choice('random_state', [12345]),
 #        'min_samples_leaf': hp.choice('min_samples_leaf', range(1, 5)),
 #        'min_samples_split': hp.choice('min_samples_split', range(5, 10))
     },
+    {
+        'model': 'xgboost',
+        'max_depth': hp.choice('max_depth_xg', range(3, 6)),
+        'n_estimators': hp.choice('n_estimators_xg', range(30, 100)),
+        'gamma': [0,1,5],
+        'scale_pos_weight':[1,10,25,50,75,99,100],
+        #'subsample': [0.4,0.6,0.8],
+        #'colsample_bytree': [0.5,0.6,0.8]
+    },    
 ])
 
 parameter_dict = {
@@ -66,15 +76,23 @@ parameter_dict = {
         {
             'clf': [LogisticRegression(random_state=12345)],
             'clf__penalty': ['l2'],
-            'clf__C': [1,2,4,6,9],
-            'clf__max_iter' : [100, 250, 500, 1000, 2000],
-            'clf__solver' : ["newton-cg", 'sag', "lbfgs"]
+            'clf__C': np.logspace(0, 4, 8)
         },
     'knn':
         {
             'clf': [KNeighborsClassifier(n_jobs=3)],
             'clf__n_neighbors': [5, 10, 20, 25, 30],
             'clf__weights': ['uniform', 'distance'],
+        },
+    'xgboost':
+        {
+            'clf': [XGBClassifier(random_state=12345,n_jobs=3)],
+            'clf__max_depth': [3,4,6,8],
+            'clf__n_estimators': [30,50,80,100],
+            'clf__gamma': [0,1,5],
+            'clf__scale_pos_weight':[1,10,25,50,75,99,100],            
+            #'clf__subsample': [0.4,0.6,0.8],
+            #'clf__colsample_bytree': [0.5,0.6,0.8],
         }
     #    'svm' : {
     #        'clf': [SVC()],
